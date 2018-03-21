@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="tinyobj\include\tiny_obj_loader.cc">
+      <Filter>tinyobj</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DRenderWidget.cpp">
+      <Filter>Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_D3DRenderWidget.cpp">
+      <Filter>Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_D3DRenderWidget.cpp">
+      <Filter>Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_QtD3D11.cpp">
+      <Filter>Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_QtD3D11.cpp">
+      <Filter>Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\qrc_QtD3D11.cpp">
+      <Filter>Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="QtD3D11.cpp">
+      <Filter>Qt</Filter>
+    </ClCompile>
+    <ClCompile Include="D3DRender.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="SimpleCamera.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="DxUtils.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+    <ClCompile Include="DxObjModel.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="tinyobj\include\tiny_obj_loader.h">
+      <Filter>tinyobj</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_QtD3D11.h">
+      <Filter>Qt</Filter>
+    </ClInclude>
+    <ClInclude Include="D3DRender.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="SimpleCamera.h">
+      <Filter>render</Filter>
+    </ClInclude>
+    <ClInclude Include="DxUtils.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="DxObjModel.h">
+      <Filter>common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="D3DRenderWidget.h">
+      <Filter>Qt</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QtD3D11.h">
+      <Filter>Qt</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QtD3D11.qrc">
+      <Filter>Qt</Filter>
+    </CustomBuild>
+    <CustomBuild Include="QtD3D11.ui">
+      <Filter>Qt</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="tinyobj">
+      <UniqueIdentifier>{c41721fc-1118-497a-9822-68070cc9bd84}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="math">
+      <UniqueIdentifier>{3d1bfedd-64fe-447d-b3de-ba37e2ed0dd1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Qt">
+      <UniqueIdentifier>{303df5e1-623b-4aa1-ae74-ddc8d8f92d2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="shader">
+      <UniqueIdentifier>{efc56a5f-ebc9-43a1-8a9e-a54645ca033b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render">
+      <UniqueIdentifier>{a055515a-b0dd-4bdc-af42-a5c4dc4ba70b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="common">
+      <UniqueIdentifier>{781c0ebe-8507-41c6-b6ed-61e1509de32d}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="test1.fx">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="DxUtils.inc">
+      <Filter>common</Filter>
+    </None>
+  </ItemGroup>
+</Project>

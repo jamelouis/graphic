@@ -280,7 +280,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="DxUtils.inc" />
-    <None Include="test1.fx" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\shadow.fx">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\test1.fx">
+      <FileType>Document</FileType>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -39,9 +39,15 @@ HRESULT CreatePixelShader(
 //
 //
 //
-HRESULT CreateDSV(
+HRESULT CreateDepthAsset(
     ID3D11Device* pDevice,
     int width,
     int height,
-    ID3D11DepthStencilView** ppDSV
+    ID3D11Texture2D**           ppTexture,
+    ID3D11DepthStencilView**    ppDSV,
+    ID3D11ShaderResourceView**  ppSRV,
+    BOOL                        bGenerateSRV = false
 );
+
+
+HRESULT CreateSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSamplerState);

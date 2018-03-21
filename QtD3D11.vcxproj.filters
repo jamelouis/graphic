@@ -94,11 +94,14 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <None Include="test1.fx">
-      <Filter>shader</Filter>
-    </None>
     <None Include="DxUtils.inc">
       <Filter>common</Filter>
+    </None>
+    <None Include="shader\shadow.fx">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\test1.fx">
+      <Filter>shader</Filter>
     </None>
   </ItemGroup>
 </Project>

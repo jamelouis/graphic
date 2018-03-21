@@ -37,7 +37,8 @@ public:
     HRESULT Init(const std::string& filename, ID3D11Device* pDevice);
     void    Unit();
 
-    void Render(ID3D11DeviceContext* pContext, glm::mat4x4 viewProj);
+    void Render(ID3D11DeviceContext* pContext);
+    void RenderDepth(ID3D11DeviceContext* pContext);
 
     const BoundingBox& GetBoundingBox();
 private:
@@ -56,5 +57,7 @@ private:
     ID3D11RasterizerState*          state;
     ID3D11DepthStencilState*        dsState;
     ID3D11BlendState*               blendState;
+
+    ID3D11VertexShader*             smvshader_;
 };
 

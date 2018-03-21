@@ -150,11 +150,14 @@ HRESULT CompileShader(
 //
 //
 //
-HRESULT CreateDSV(
+HRESULT CreateDepthAsset(
     ID3D11Device* pDevice,
     int width,
     int height,
-    ID3D11DepthStencilView** ppDSV
+    ID3D11Texture2D**           ppTexture,
+    ID3D11DepthStencilView**    ppDSV,
+    ID3D11ShaderResourceView**  ppSRV,
+    BOOL                        bGenerateSRV
     )
 {
     HRESULT hr = E_FAIL;
@@ -165,15 +168,13 @@ HRESULT CreateDSV(
     desc.MipLevels = desc.ArraySize = 1;
     desc.Format = DXGI_FORMAT_R24G8_TYPELESS;
     desc.Usage = D3D11_USAGE_DEFAULT;
-    desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+    desc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
     desc.CPUAccessFlags = 0;
     desc.MiscFlags = 0;
     desc.SampleDesc.Count = 1;
     desc.SampleDesc.Quality = 0;
 
-
-    ID3D11Texture2D *pTexture;
-    hr = pDevice->CreateTexture2D(&desc, NULL, &pTexture);
+    hr = pDevice->CreateTexture2D(&desc, NULL, ppTexture);
     assert(!FAILED(hr));
 
     D3D11_DEPTH_STENCIL_VIEW_DESC dsDesc;
@@ -182,7 +183,48 @@ HRESULT CreateDSV(
     dsDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
     dsDesc.Texture2D.MipSlice = 0;
     
-    hr = pDevice->CreateDepthStencilView(pTexture, &dsDesc, ppDSV);
+    hr = pDevice->CreateDepthStencilView(*ppTexture, &dsDesc, ppDSV);
+    assert(!FAILED(hr));
+
+    if (bGenerateSRV)
+    {
+        D3D11_SHADER_RESOURCE_VIEW_DESC desc = {
+            DXGI_FORMAT_R24_UNORM_X8_TYPELESS,
+            D3D11_SRV_DIMENSION_TEXTURE2D,
+            0,
+            0
+        };
+        desc.Texture2D.MipLevels = 1;
+        hr = pDevice->CreateShaderResourceView(*ppTexture, &desc, ppSRV);
+        assert(!FAILED(hr));
+    }
+
+    return hr;
+}
+
+
+//
+//
+//
+HRESULT CreateSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSamplerState)
+{
+    HRESULT hr = E_FAIL;
+
+    D3D11_SAMPLER_DESC desc = 
+    {
+        D3D11_FILTER_COMPARISON_MIN_MAG_LINEAR_MIP_POINT,
+        D3D11_TEXTURE_ADDRESS_BORDER,
+        D3D11_TEXTURE_ADDRESS_BORDER,
+        D3D11_TEXTURE_ADDRESS_BORDER,
+        0,
+        0,
+        D3D11_COMPARISON_LESS,
+        0,0,0,0,
+        0,
+        0
+    };
+
+    hr = pDevice->CreateSamplerState(&desc, ppSamplerState);
     assert(!FAILED(hr));
 
     return hr;

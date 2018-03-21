@@ -18,6 +18,7 @@ struct CommonBuffer
 {
     glm::mat4x4 viewProj;
     Light       light;
+    glm::mat4x4 smviewProj;
 };
 
 class D3DRender
@@ -36,12 +37,22 @@ public:
     void createBuffers();
     void releaseBuffers();
     void render();
+    void renderDepth();
+
+private:
+    void _UpdateCamera();
+    void _UpdateDepthCamera();
+
+private:
 
     ID3D11Device* device_;
     ID3D11DeviceContext* context_;
     IDXGISwapChain* swapChain_;
     ID3D11RenderTargetView* rtView_;
+
+    ID3D11Texture2D* mainDepthTex_;
     ID3D11DepthStencilView* rtDSV_;
+    
     DXGI_SWAP_CHAIN_DESC swapChainDesc_;
     ID3D11Texture2D* backBuffer_;
     D3D11_VIEWPORT viewport_;
@@ -57,5 +68,15 @@ public:
     DxObjModel*    dxObjModel_;
 
     CommonBuffer   cpuCommonBuffer;
+
+
+    ID3D11Texture2D*            shadowTex_;
+    ID3D11DepthStencilView*     shadowDSV_;
+    ID3D11ShaderResourceView*   shadowRSV_;
+    ID3D11SamplerState*         shadowSampler_;
+
+    D3D11_VIEWPORT              shadowViewport_;
+
+    
 };
 

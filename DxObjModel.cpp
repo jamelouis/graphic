@@ -151,27 +151,6 @@ HRESULT DxObjModel::Init(const std::string& filename, ID3D11Device* pDevice)
         meshRenders_.push_back(meshRender);
     }
 
-#if 0
-    hr = CreateVertexBuffer(pDevice, &attrib.vertices[0], sizeof(attrib.vertices[0])*attrib.vertices.size(), &vbuffer_);
-    assert(!FAILED(hr));
-
-    for (int i = 0; i < shapes.size(); ++i)
-    {
-        Mesh mesh;
-        auto shape = shapes[i];
-        ID3D11Buffer* ibuffer = nullptr;
-        std::vector<WORD> indices;
-        indices.reserve(shape.mesh.indices.size());
-        for (int i = 0; i < shape.mesh.indices.size(); ++i) {
-            indices.push_back(shape.mesh.indices[i].vertex_index);
-        }
-        hr = CreateIndexBuffer(pDevice, (void*)&indices[0], sizeof(indices[0])*indices.size(), &mesh.ibuffer);
-        assert(!FAILED(hr));
-        mesh.indexCount = indices.size();
-        
-        meshs_.push_back(mesh);
-    }
-#endif
     hr = CreateConstantBuffer(pDevice, sizeof(MaterialParam), &cbPerObject_);
     assert(!FAILED(hr));
 
@@ -181,10 +160,13 @@ HRESULT DxObjModel::Init(const std::string& filename, ID3D11Device* pDevice)
     };
     UINT numElements = 2;
 
-    hr = CreateVertexShader(pDevice, "test1.fx", "VSMain", "vs_4_0", layout, numElements, &layout_, &vshader_);
+    hr = CreateVertexShader(pDevice, "shader/test1.fx", "VSMain", "vs_4_0", layout, numElements, &layout_, &vshader_);
     assert(!FAILED(hr));
 
-    hr = CreatePixelShader(pDevice, "test1.fx", "PSMain", "ps_4_0", &pshader_);
+    hr = CreatePixelShader(pDevice, "shader/test1.fx", "PSMain", "ps_4_0", &pshader_);
+    assert(!FAILED(hr));
+
+    hr = CreateVertexShader(pDevice, "shader/shadow.fx", "VSMain", "vs_4_0", layout, numElements, &layout_, &smvshader_);
     assert(!FAILED(hr));
 
     D3D11_RASTERIZER_DESC desc;
@@ -252,7 +234,7 @@ void    DxObjModel::Unit()
     
 }
 
-void DxObjModel::Render(ID3D11DeviceContext* pContext, glm::mat4x4 viewProj)
+void DxObjModel::Render(ID3D11DeviceContext* pContext)
 {
     HRESULT hr = E_FAIL;
     UINT stride = sizeof(float) * 8;
@@ -284,6 +266,31 @@ void DxObjModel::Render(ID3D11DeviceContext* pContext, glm::mat4x4 viewProj)
     
 }
 
+void DxObjModel::RenderDepth(ID3D11DeviceContext* pContext)
+{
+    HRESULT hr = E_FAIL;
+    UINT stride = sizeof(float) * 8;
+    UINT offset = 0;
+
+    pContext->IASetInputLayout(layout_);
+    pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    pContext->VSSetShader(vshader_, NULL, 0);
+    pContext->PSSetShader(NULL, NULL, 0);
+
+    pContext->RSSetState(state);
+    pContext->OMSetDepthStencilState(dsState, 0);
+    float BlendFactor[4] = { 0, 0, 0, 0 };
+    pContext->OMSetBlendState(blendState, BlendFactor, 0xffffffff);
+
+    for (auto meshRender : meshRenders_)
+    {
+        pContext->IASetVertexBuffers(0, 1, &meshRender.vbuffer, &stride, &offset);
+
+        pContext->IASetIndexBuffer(meshRender.ibuffer, DXGI_FORMAT_R32_UINT, 0);
+        pContext->DrawIndexed(meshRender.indexCount, 0, 0);
+    }
+}
 
 const BoundingBox& DxObjModel::GetBoundingBox()
 {

@@ -16,6 +16,8 @@
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
 #include "DxObjModel.h"
+#include "VoxelDebug.h"
+
 
 D3DRender::D3DRender()
 {
@@ -35,6 +37,15 @@ HRESULT D3DRender::Init()
     HRESULT hr = E_FAIL;
     dxObjModel_ = new DxObjModel();
     hr = dxObjModel_->Init("models/cornell.obj", device_);
+    // hr = dxObjModel_->Init("models/susanne.obj", device_);
+    
+    assert(!FAILED(hr));
+
+    
+    _CalcVoxelInfo(voxelScale_, voxelBias_);
+
+    voxelDebug_ = new VoxelDebug();
+    hr = voxelDebug_->Init(device_, dim_, voxelScale_, voxelBias_);
     assert(!FAILED(hr));
 
     hr = CreateConstantBuffer(device_, sizeof(CommonBuffer), &commonBuffer);
@@ -42,6 +53,7 @@ HRESULT D3DRender::Init()
 
     cpuCommonBuffer.light.vLightColor = glm::vec4(1.0, 1.0, 1.0,1.0);
     cpuCommonBuffer.light.vLightDir = glm::vec4(glm::normalize(glm::vec3(0.4, 0.8,0.0)), 1.0);
+    cpuCommonBuffer.dim = dim_;
 
     return hr;
 }
@@ -107,8 +119,17 @@ void D3DRender::createDevice(int width, int height, HWND hWnd)
     hr = CreateSampler(device_, &shadowSampler_);
     assert(!FAILED(hr));
 
+    hr = CreateDefaultSampler(device_, &voxelSampler_);
+
     hr = CreateDepthAsset(device_, 512, 512, &shadowTex_, &shadowDSV_, &shadowRSV_, true);
     assert(!FAILED(hr));
+
+    for (int i = 0; i < 6; ++i)
+    {
+        hr = CreateTexture3D(device_, dim_, dim_, dim_, &voxelTexs_[i], &voxelUAVs_[i], &voxelSRVs_[i]);
+        assert(!FAILED(hr));
+    }
+    
 }
 
 int indexCount = 0;
@@ -149,10 +170,19 @@ void D3DRender::render()
     HRESULT hr;
 
     renderDepth();
+    renderVoxel();
 
+    renderColor();
+    swapChain_->Present(0, 0);
+}
+
+void D3DRender::renderColor()
+{
+    HRESULT hr = E_FAIL;
     float clearColor[] = { 0.3f, 0.3f, 0.3f, 1.0f };
 
     _UpdateCamera();
+    //_UpdateVoxelCamera();
 
     hr = UpdateConstantBuffer(context_, commonBuffer, cpuCommonBuffer);
     assert(!FAILED(hr));
@@ -170,9 +200,15 @@ void D3DRender::render()
 
     dxObjModel_->Render(context_);
 
-    ID3D11ShaderResourceView* pnullSRV = NULL;
-    context_->PSSetShaderResources(0, 1, &pnullSRV);
-    swapChain_->Present(0, 0);
+    context_->GSSetConstantBuffers(0, 1, &commonBuffer);
+    context_->PSSetShaderResources(1, 6, &voxelSRVs_[0]);
+    context_->PSSetSamplers(1, 1, &voxelSampler_);
+
+    voxelDebug_->Render(context_);
+
+    ID3D11ShaderResourceView* pnullSRV[7] = { NULL };
+    context_->PSSetShaderResources(0, 7, &pnullSRV[0]);
+
 }
 
 void D3DRender::_UpdateCamera()
@@ -193,6 +229,7 @@ void D3DRender::_UpdateCamera()
     glm::mat4x4 ViewProj = Proj * View * world;
 
     cpuCommonBuffer.viewProj = glm::transpose(ViewProj);
+    cpuCommonBuffer.voxelScale = 1.0f / voxelScale_ / dim_;
 }
 
 void D3DRender::renderDepth()
@@ -244,4 +281,120 @@ void D3DRender::_UpdateDepthCamera()
     shadowViewport_.TopLeftY = 0;
     shadowViewport_.Width    = 512;
     shadowViewport_.Height   = 512;
+}
+
+void D3DRender::renderVoxel()
+{
+    HRESULT hr = E_FAIL;
+
+    int i = 0;
+    float uav[4] = { 0.0 };
+    float clearColor[4] = { 0.3,0.3,0.3,1.0 };
+
+    for (int i = 0; i < 6; ++i)
+    {
+        _UpdateVoxelCamera(i);
+
+        hr = UpdateConstantBuffer(context_, commonBuffer, cpuCommonBuffer);
+        assert(!FAILED(hr));
+
+        context_->OMSetRenderTargetsAndUnorderedAccessViews(1, &rtView_, rtDSV_, 1, 1, &voxelUAVs_[i], NULL);
+        context_->ClearRenderTargetView(rtView_, clearColor);
+        context_->ClearDepthStencilView(rtDSV_, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+        context_->ClearUnorderedAccessViewFloat(voxelUAVs_[i], uav);
+        context_->RSSetViewports(1, &boxelViewport_);
+
+        context_->VSSetConstantBuffers(0, 1, &commonBuffer);
+        context_->PSSetConstantBuffers(0, 1, &commonBuffer);
+
+        context_->PSSetShaderResources(0, 1, &shadowRSV_);
+        context_->PSSetSamplers(0, 1, &shadowSampler_);
+
+        dxObjModel_->RenderVoxel(context_);
+
+        ID3D11ShaderResourceView* pnullSRV = NULL;
+        context_->PSSetShaderResources(0, 1, &pnullSRV);
+
+        ID3D11UnorderedAccessView* pnullUAV = NULL;
+        context_->OMSetRenderTargetsAndUnorderedAccessViews(0, NULL, NULL, 0, 1, &pnullUAV, NULL);
+    }
+    
+}
+
+void D3DRender::_UpdateVoxelCamera(int face)
+{
+    auto boundingBox = dxObjModel_->GetBoundingBox();
+
+    float fDist = std::abs(glm::distance(boundingBox.vMax, boundingBox.vMin)) / 2.0;
+    glm::vec3 t = boundingBox.vMax - boundingBox.vMin;
+    float fScale = 1.0f/std::max(t.x, std::max(t.y, t.z));
+
+    glm::vec3 vTarget = glm::vec3(0.0f,-1.0,0.0);
+    glm::vec3 vPos = glm::vec3(0.0, 0.0, 0.0);
+    glm::vec3 vUp = glm::vec3(1.0, 0.0, 0.0);
+
+    switch (face)
+    {
+    case 0: // +X
+        vTarget = glm::vec3(1.0, 0.0, 0.0);
+        vUp     = glm::vec3(0.0, 1.0, 0.0);
+        break;
+    case 1: // -X
+        vTarget = glm::vec3(-1.0, 0.0, 0.0);
+        vUp     = glm::vec3(0.0, 1.0, 0.0);
+        break;
+    case 2: // +Y
+        vTarget = glm::vec3(0.0, 1.0, 0.0);
+        vUp     = glm::vec3(0.0, 0.0, -1.0);
+        break;
+    case 3: // -Y
+        vTarget = glm::vec3(0.0, -1.0, 0.0);
+        vUp     = glm::vec3(0.0, 0.0, 1.0);
+        break;
+    case 4: // +Z
+        vTarget = glm::vec3(0.0, 0.0, 1.0);
+        vUp     = glm::vec3(0.0, 1.0, 0.0);
+        break;
+    case 5: // -Z
+        vTarget = glm::vec3(1.0, 0.0, -1.0);
+        vUp     = glm::vec3(0.0, 1.0, 0.0);
+        break;
+    default:
+        assert(0 != 1);
+
+    }
+
+    glm::mat4 view = glm::lookAt(vPos, vTarget, vUp);
+    glm::mat4 proj = glm::ortho(-1.0f, 1.0f, -1.0f, 1.0f, -3.0f, 1.01f);
+
+    glm::mat4x4 world = glm::translate(glm::mat4(1.0), glm::vec3(-1.0))
+        * glm::scale(glm::mat4(1.0), glm::vec3(2.0))
+        * glm::scale(glm::mat4(1.0), glm::vec3(fScale)) 
+        * glm::translate(glm::mat4(1.f), -boundingBox.vMin);
+    
+    glm::mat4 worldViewProj = proj * view *world;
+
+    cpuCommonBuffer.viewProj = glm::transpose(worldViewProj);
+    cpuCommonBuffer.storageTransorm = glm::transpose(world);
+    
+
+    ZeroMemory(&boxelViewport_, sizeof(D3D11_VIEWPORT));
+    boxelViewport_.MinDepth = 0.0f;
+    boxelViewport_.MaxDepth = 1.0f;
+    boxelViewport_.TopLeftX = 0;
+    boxelViewport_.TopLeftY = 0;
+    boxelViewport_.Width = dim_;
+    boxelViewport_.Height = dim_;
+}
+
+void D3DRender::_CalcVoxelInfo(float& voxelScale, glm::vec3& voxelBias)
+{
+    auto boundingBox = dxObjModel_->GetBoundingBox();
+
+    float fDist = std::abs(glm::distance(boundingBox.vMax, boundingBox.vMin)) / 2.0;
+    glm::vec3 t = boundingBox.vMax - boundingBox.vMin;
+    voxelScale = 1.0f / std::max(t.x, std::max(t.y, t.z));
+
+    voxelBias = -boundingBox.vMin;
 }

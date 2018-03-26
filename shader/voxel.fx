@@ -7,6 +7,8 @@ cbuffer cbMaterial : register(b1) {
     float3 ks;
 };
 
+globallycoherent RWTexture3D<float4>     g_txVoxel:register(u1);
+
 Texture2D                g_txShadow : register(t0);
 SamplerComparisonState   g_samShadow : register(s0);
 
@@ -49,10 +51,21 @@ float4 PSMain(VS_Output InData) : SV_TARGET
 {
     float shadow = CalcShadows(InData.vPos);
 
-    float NdotL = dot(InData.normal.xyz, light.vLightDir);
+    float NdotL = dot(InData.normal.xyz, light.vLightDir.xyz);
     
     float3 diffuse = light.vLightColor.rgb * NdotL * kd.rgb * shadow;
 
-    //return float4(kd.rgb,1.0);
+    // store voxel 
+    float4 storagePos = mul(InData.vPos, storageTransorm);
+    storagePos /= storagePos.w;
+    storagePos = (storagePos + 1.0f) / 2.0f;
+
+    
+    uint3 voxelPos = uint3(dim.xxx*storagePos.xyz);
+
+    //voxelPos = uint3(0, 0, 0);
+    g_txVoxel[voxelPos] = float4(diffuse, 1.0);
+
+    return float4(kd.rgb,1.0);
    return float4(diffuse,1.0);
 }

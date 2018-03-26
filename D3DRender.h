@@ -7,6 +7,7 @@
 
 class SimpleCamera;
 class DxObjModel;
+class VoxelDebug;
 
 struct Light
 {
@@ -19,6 +20,10 @@ struct CommonBuffer
     glm::mat4x4 viewProj;
     Light       light;
     glm::mat4x4 smviewProj;
+    glm::mat4x4 storageTransorm;
+    float       voxelScale;
+    UINT        dim;
+    glm::vec2      padding;
 };
 
 class D3DRender
@@ -37,12 +42,17 @@ public:
     void createBuffers();
     void releaseBuffers();
     void render();
+    void renderColor();
     void renderDepth();
+    void renderVoxel();
+    
 
 private:
     void _UpdateCamera();
     void _UpdateDepthCamera();
+    void _UpdateVoxelCamera(int face);
 
+    void _CalcVoxelInfo(float& voxelScale, glm::vec3& voxelBias);
 private:
 
     ID3D11Device* device_;
@@ -66,6 +76,7 @@ private:
     SimpleCamera* simpleCameraPtr_;
 
     DxObjModel*    dxObjModel_;
+    VoxelDebug*    voxelDebug_;
 
     CommonBuffer   cpuCommonBuffer;
 
@@ -77,6 +88,15 @@ private:
 
     D3D11_VIEWPORT              shadowViewport_;
 
-    
+    ID3D11Texture3D*            voxelTexs_[6];
+    ID3D11UnorderedAccessView*  voxelUAVs_[6];
+    ID3D11ShaderResourceView*   voxelSRVs_[6];
+    ID3D11SamplerState*         voxelSampler_;
+
+    D3D11_VIEWPORT              boxelViewport_;
+
+    static const int            dim_ = 16;
+    float                       voxelScale_;
+    glm::vec3                   voxelBias_;
 };
 

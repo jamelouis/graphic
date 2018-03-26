@@ -38,6 +38,9 @@
     <ClCompile Include="DxObjModel.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="VoxelDebug.cpp">
+      <Filter>common</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinyobj\include\tiny_obj_loader.h">
@@ -56,6 +59,12 @@
       <Filter>common</Filter>
     </ClInclude>
     <ClInclude Include="DxObjModel.h">
+      <Filter>common</Filter>
+    </ClInclude>
+    <ClInclude Include="shader\common.h">
+      <Filter>shader</Filter>
+    </ClInclude>
+    <ClInclude Include="VoxelDebug.h">
       <Filter>common</Filter>
     </ClInclude>
   </ItemGroup>
@@ -101,6 +110,12 @@
       <Filter>shader</Filter>
     </None>
     <None Include="shader\test1.fx">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\voxel.fx">
+      <Filter>shader</Filter>
+    </None>
+    <None Include="shader\voxeldebug.fx">
       <Filter>shader</Filter>
     </None>
   </ItemGroup>

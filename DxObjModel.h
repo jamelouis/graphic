@@ -39,11 +39,17 @@ public:
 
     void Render(ID3D11DeviceContext* pContext);
     void RenderDepth(ID3D11DeviceContext* pContext);
+    void RenderVoxel(ID3D11DeviceContext* pContext);
+
 
     const BoundingBox& GetBoundingBox();
 private:
 
-    
+    void _Render(
+        ID3D11DeviceContext* pContext,
+        ID3D11VertexShader*             vshader,
+        ID3D11PixelShader*              pshader
+        );
     
     std::vector<MeshRender>               meshRenders_;
     BoundingBox                           boundingBox_;
@@ -59,5 +65,8 @@ private:
     ID3D11BlendState*               blendState;
 
     ID3D11VertexShader*             smvshader_;
+
+    ID3D11VertexShader*             voxelVsShader_;
+    ID3D11PixelShader*              voxelPsShader_;
 };
 

@@ -27,6 +27,14 @@ HRESULT CreateVertexShader(
     ID3D11VertexShader** ppVertexShader
 );
 
+HRESULT CreateGeometryShader(
+    ID3D11Device* pDevice,
+    const std::string& filename,
+    const std::string& entry,
+    const std::string& sm,
+    ID3D11GeometryShader** ppGeometryShader
+);
+
 HRESULT CreatePixelShader(
     ID3D11Device* pDevice,
     const std::string& filename,
@@ -49,5 +57,15 @@ HRESULT CreateDepthAsset(
     BOOL                        bGenerateSRV = false
 );
 
-
+HRESULT CreateDefaultSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSamplerState);
 HRESULT CreateSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSamplerState);
+
+HRESULT CreateTexture3D(
+    ID3D11Device* pDevice,
+    int width,
+    int height,
+    int depth,
+    ID3D11Texture3D** ppTex3D,
+    ID3D11UnorderedAccessView** ppUAV,
+    ID3D11ShaderResourceView** ppSRV
+);

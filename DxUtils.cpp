@@ -94,6 +94,26 @@ HRESULT CreateVertexShader(
     return hr;
 }
 
+HRESULT CreateGeometryShader(
+    ID3D11Device* pDevice,
+    const std::string& filename,
+    const std::string& entry,
+    const std::string& sm,
+    ID3D11GeometryShader** ppGeometryShader 
+)
+{
+    HRESULT hr = E_FAIL;
+
+    ID3DBlob* pBlob;
+    hr = CompileShader(filename, entry, sm, &pBlob);
+    assert(!FAILED(hr));
+
+    hr = pDevice->CreateGeometryShader(pBlob->GetBufferPointer(), pBlob->GetBufferSize(), NULL, ppGeometryShader);
+    assert(!FAILED(hr));
+
+    return hr;
+}
+
 HRESULT CreatePixelShader(
     ID3D11Device* pDevice,
     const std::string& filename,
@@ -114,6 +134,43 @@ HRESULT CreatePixelShader(
     return hr;
 }
 
+// Implementing ID3DInclude
+// http://nikvoss.com/2013/03/implementing-id3dinclude/
+// 
+class D3DInclude : public ID3DInclude
+{
+    HRESULT Open(D3D_INCLUDE_TYPE IncludeType, LPCSTR pFileName, LPCVOID pParentData, LPCVOID *ppData, UINT *pBytes)
+    {
+        std::string filePath = std::string("shader\\") + pFileName;
+        std::ifstream file(filePath.c_str(), std::ios::in|std::ios::binary|std::ios::ate);
+
+        //OutputDebugStringA(filePath.c_str());
+        if (file.is_open())
+        {
+            long long fileSize = file.tellg();
+            char* buf = new char[fileSize];
+            file.seekg(0, std::ios::beg);
+            file.read(buf, fileSize);
+            file.close();
+            *ppData = buf;
+            *pBytes = fileSize;
+            //OutputDebugStringA((char*)*ppData);
+        }
+
+        //OutputDebugStringA("End of Open");
+        
+        
+
+        return S_OK;
+    };
+
+    HRESULT Close(LPCVOID pData)
+    {
+        char* buf = (char*)pData;
+        delete[] buf;
+        return S_OK;
+    };
+};
 
 HRESULT CompileShader(
     const std::string&  filename,
@@ -125,11 +182,11 @@ HRESULT CompileShader(
     HRESULT hr = E_FAIL;
     DWORD flags = D3DCOMPILE_ENABLE_STRICTNESS | D3DCOMPILE_DEBUG;
     ID3DBlob* errBlob;
-
+    D3DInclude Include;
     std::ifstream stream(filename.c_str());
     std::string source(std::istreambuf_iterator<char>(stream), (std::istreambuf_iterator<char>()));
 
-    hr = D3DCompile(source.c_str(), source.size(), filename.c_str(), NULL, NULL, entry.c_str(), sm.c_str(), flags, 0, ppBlob, &errBlob);
+    hr = D3DCompile(source.c_str(), source.size(), filename.c_str(), NULL, &Include, entry.c_str(), sm.c_str(), flags, 0, ppBlob, &errBlob);
     if (FAILED(hr))
     {
         if (errBlob != NULL)
@@ -228,4 +285,73 @@ HRESULT CreateSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSamplerState
     assert(!FAILED(hr));
 
     return hr;
+}
+
+HRESULT CreateDefaultSampler(ID3D11Device* pDevice, ID3D11SamplerState** ppSamplerState)
+{
+    HRESULT hr = E_FAIL;
+
+    D3D11_SAMPLER_DESC desc =
+    {
+        D3D11_FILTER_MIN_MAG_MIP_POINT,
+        D3D11_TEXTURE_ADDRESS_BORDER,
+        D3D11_TEXTURE_ADDRESS_BORDER,
+        D3D11_TEXTURE_ADDRESS_BORDER,
+        0,
+        0,
+        D3D11_COMPARISON_NEVER,
+        0,0,0,0,
+        0,
+        0
+    };
+
+    hr = pDevice->CreateSamplerState(&desc, ppSamplerState);
+    assert(!FAILED(hr));
+
+    return hr;
+}
+
+HRESULT CreateTexture3D(
+    ID3D11Device* pDevice,
+    int width,
+    int height,
+    int depth,
+    ID3D11Texture3D** ppTex3D,
+    ID3D11UnorderedAccessView** ppUAV,
+    ID3D11ShaderResourceView** ppSRV
+)
+{
+    HRESULT hr = E_FAIL;
+
+    D3D11_TEXTURE3D_DESC desc =
+    {
+        width, height, depth,
+        0,
+        DXGI_FORMAT_R16G16B16A16_FLOAT,
+        D3D11_USAGE_DEFAULT,
+        D3D11_BIND_UNORDERED_ACCESS|D3D11_BIND_SHADER_RESOURCE,
+        0,
+        0
+    };
+
+    hr = pDevice->CreateTexture3D(&desc, NULL, ppTex3D);
+    assert(!FAILED(hr));
+
+    D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc = 
+    {
+        DXGI_FORMAT_R16G16B16A16_FLOAT,
+        D3D11_UAV_DIMENSION_TEXTURE3D,
+    };
+
+    uavDesc.Texture3D.MipSlice = 0;
+    uavDesc.Texture3D.WSize = depth;
+
+    hr = pDevice->CreateUnorderedAccessView(*ppTex3D, &uavDesc, ppUAV);
+    assert(!FAILED(hr));
+
+    hr = pDevice->CreateShaderResourceView(*ppTex3D, NULL, ppSRV);
+    assert(!FAILED(hr));
+
+    return hr;
+    
 }

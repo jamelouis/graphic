@@ -169,6 +169,12 @@ HRESULT DxObjModel::Init(const std::string& filename, ID3D11Device* pDevice)
     hr = CreateVertexShader(pDevice, "shader/shadow.fx", "VSMain", "vs_4_0", layout, numElements, &layout_, &smvshader_);
     assert(!FAILED(hr));
 
+    hr = CreateVertexShader(pDevice, "shader/voxel.fx", "VSMain", "vs_4_0", layout, numElements, &layout_, &voxelVsShader_);
+    assert(!FAILED(hr));
+
+    hr = CreatePixelShader(pDevice, "shader/voxel.fx", "PSMain", "ps_5_0", &voxelPsShader_);
+    assert(!FAILED(hr));
+
     D3D11_RASTERIZER_DESC desc;
     ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
     desc.FillMode = D3D11_FILL_SOLID;
@@ -236,34 +242,7 @@ void    DxObjModel::Unit()
 
 void DxObjModel::Render(ID3D11DeviceContext* pContext)
 {
-    HRESULT hr = E_FAIL;
-    UINT stride = sizeof(float) * 8;
-    UINT offset = 0;
-
-    pContext->IASetInputLayout(layout_);
-    
-    
-    pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-
-    pContext->VSSetShader(vshader_, NULL, 0);
-    pContext->PSSetShader(pshader_, NULL, 0);
-
-    pContext->RSSetState(state);
-    pContext->OMSetDepthStencilState(dsState, 0);
-    float BlendFactor[4] = { 0, 0, 0, 0 };
-    pContext->OMSetBlendState(blendState, BlendFactor, 0xffffffff);
-
-    for (auto meshRender : meshRenders_)
-    {
-        pContext->IASetVertexBuffers(0, 1, &meshRender.vbuffer, &stride, &offset);
-
-        hr = UpdateConstantBuffer(pContext, cbPerObject_, meshRender.materialParam);
-        pContext->PSSetConstantBuffers(1, 1, &cbPerObject_);
-
-        pContext->IASetIndexBuffer(meshRender.ibuffer, DXGI_FORMAT_R32_UINT, 0);
-        pContext->DrawIndexed(meshRender.indexCount, 0, 0);
-    }
-    
+    _Render(pContext, vshader_, pshader_);
 }
 
 void DxObjModel::RenderDepth(ID3D11DeviceContext* pContext)
@@ -292,7 +271,47 @@ void DxObjModel::RenderDepth(ID3D11DeviceContext* pContext)
     }
 }
 
+void DxObjModel::RenderVoxel(ID3D11DeviceContext* pContext)
+{
+    _Render(pContext, voxelVsShader_, voxelPsShader_);
+}
+
 const BoundingBox& DxObjModel::GetBoundingBox()
 {
     return boundingBox_;
+}
+
+void DxObjModel::_Render(
+    ID3D11DeviceContext* pContext,
+    ID3D11VertexShader*             vshader,
+    ID3D11PixelShader*              pshader
+)
+{
+    HRESULT hr = E_FAIL;
+    UINT stride = sizeof(float) * 8;
+    UINT offset = 0;
+
+    pContext->IASetInputLayout(layout_);
+
+
+    pContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+    pContext->VSSetShader(vshader, NULL, 0);
+    pContext->PSSetShader(pshader, NULL, 0);
+
+    pContext->RSSetState(state);
+    pContext->OMSetDepthStencilState(dsState, 0);
+    float BlendFactor[4] = { 0, 0, 0, 0 };
+    pContext->OMSetBlendState(blendState, BlendFactor, 0xffffffff);
+
+    for (auto meshRender : meshRenders_)
+    {
+        pContext->IASetVertexBuffers(0, 1, &meshRender.vbuffer, &stride, &offset);
+
+        hr = UpdateConstantBuffer(pContext, cbPerObject_, meshRender.materialParam);
+        pContext->PSSetConstantBuffers(1, 1, &cbPerObject_);
+
+        pContext->IASetIndexBuffer(meshRender.ibuffer, DXGI_FORMAT_R32_UINT, 0);
+        pContext->DrawIndexed(meshRender.indexCount, 0, 0);
+    }
 }

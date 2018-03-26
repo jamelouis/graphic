@@ -189,6 +189,7 @@
     <ClCompile Include="QtD3D11.cpp" />
     <ClCompile Include="SimpleCamera.cpp" />
     <ClCompile Include="tinyobj\include\tiny_obj_loader.cc" />
+    <ClCompile Include="VoxelDebug.cpp" />
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="QtD3D11.h">
@@ -235,8 +236,10 @@
     <ClInclude Include="D3DRender.h" />
     <ClInclude Include="DxUtils.h" />
     <ClInclude Include="DxObjModel.h" />
+    <ClInclude Include="shader\common.h" />
     <ClInclude Include="SimpleCamera.h" />
     <ClInclude Include="tinyobj\include\tiny_obj_loader.h" />
+    <ClInclude Include="VoxelDebug.h" />
     <CustomBuild Include="D3DRenderWidget.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -288,6 +291,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="shader\test1.fx">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\voxel.fx">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="shader\voxeldebug.fx">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

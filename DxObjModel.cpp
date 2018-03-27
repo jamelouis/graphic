@@ -2,6 +2,7 @@
 #include "tinyobj/include/tiny_obj_loader.h"
 #include "DxUtils.h"
 #include <unordered_map>
+#include <algorithm>
 
 #define ObjNormal
 

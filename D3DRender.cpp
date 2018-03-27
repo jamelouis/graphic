@@ -7,6 +7,7 @@
 #include <fstream>
 
 #include <xnamath.h>
+#include <algorithm>
 
 #include "SimpleCamera.h"
 

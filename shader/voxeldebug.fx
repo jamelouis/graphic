@@ -44,7 +44,7 @@ void gsmain(point GS_Input In[1], inout LineStream<PS_Input> triStream)
 {
     PS_Input Out;
 
-    float offset = voxelScale;
+    float offset = voxelScale/2.0;
 
     float4 pos0 = mul(In[0].wPos + float4(-offset, -offset, -offset, 0.0), worldViewProj);
     float4 pos1 = mul(In[0].wPos + float4( offset, -offset, -offset, 0.0), worldViewProj);

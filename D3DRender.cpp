@@ -32,11 +32,11 @@ D3DRender::~D3DRender()
     context_->Release();
 }
 
-HRESULT D3DRender::Init()
+HRESULT D3DRender::Init(const std::string& filename)
 {
     HRESULT hr = E_FAIL;
     dxObjModel_ = new DxObjModel();
-    hr = dxObjModel_->Init("models/cornell.obj", device_);
+    hr = dxObjModel_->Init(filename, device_);
     // hr = dxObjModel_->Init("models/susanne.obj", device_);
     
     assert(!FAILED(hr));
@@ -73,7 +73,7 @@ void D3DRender::Unit()
 void D3DRender::setSimpleCamera(const SimpleCamera* simpleCamera)
 {
     simpleCameraPtr_ = (SimpleCamera*)simpleCamera;
-}
+} 
 
 void D3DRender::resize(int width, int height)
 {
@@ -266,7 +266,7 @@ void D3DRender::_UpdateDepthCamera()
     glm::vec3 vUpd = glm::vec3(0.0, 1.0, 0.0);
 
     glm::mat4 view = glm::lookAt(vPos, vTarget, vUpd);
-    glm::mat4 proj = glm::ortho(-fDist, fDist, -fDist, fDist, -2.0f * fDist, 2.0f * fDist);
+    glm::mat4 proj = glm::ortho(-fDist, fDist, -fDist, fDist, -2.0f * fDist, 3.0f * fDist);
 
     glm::mat4x4 world = glm::translate(glm::mat4(1.f), -(boundingBox.vMax + boundingBox.vMin) / 2.0f);
 
@@ -357,7 +357,7 @@ void D3DRender::_UpdateVoxelCamera(int face)
         vUp     = glm::vec3(0.0, 1.0, 0.0);
         break;
     case 5: // -Z
-        vTarget = glm::vec3(1.0, 0.0, -1.0);
+        vTarget = glm::vec3(0.0, 0.0, -1.0);
         vUp     = glm::vec3(0.0, 1.0, 0.0);
         break;
     default:

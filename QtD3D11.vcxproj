@@ -162,6 +162,7 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_lightsetting.cpp" />
     <ClCompile Include="GeneratedFiles\Debug\moc_QtD3D11.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -187,6 +188,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="DxObjModel.cpp" />
     <ClCompile Include="QtD3D11.cpp" />
+    <ClCompile Include="qtui\lightsetting.cpp" />
     <ClCompile Include="SimpleCamera.cpp" />
     <ClCompile Include="tinyobj\include\tiny_obj_loader.cc" />
     <ClCompile Include="VoxelDebug.cpp" />
@@ -236,6 +238,12 @@
     <ClInclude Include="D3DRender.h" />
     <ClInclude Include="DxUtils.h" />
     <ClInclude Include="DxObjModel.h" />
+    <CustomBuild Include="qtui\lightsetting.h">
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"   -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_CORE_LIB -DQT_GUI_LIB  "-I." "-I.\GeneratedFiles" "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I." "-I." "-I." "-I." "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing lightsetting.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+    </CustomBuild>
     <ClInclude Include="shader\common.h" />
     <ClInclude Include="SimpleCamera.h" />
     <ClInclude Include="tinyobj\include\tiny_obj_loader.h" />
@@ -285,6 +293,13 @@
     <None Include="DxUtils.inc" />
   </ItemGroup>
   <ItemGroup>
+    <CustomBuild Include="qtui\lightsetting.ui">
+      <FileType>Document</FileType>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+    </CustomBuild>
     <None Include="shader\shadow.fx">
       <FileType>Document</FileType>
     </None>

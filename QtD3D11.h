@@ -15,7 +15,14 @@ public:
 private slots:
 
   void on_actionExit_activated();
+  void on_actionOpen_activated();
+  void on_actionLightSetting_activated();
+  void on_actionTabClose_activated(int index);
 
+  void on_actionRedSpinBox_ValueChanged(double fVal);
+  void on_actionGreenSpinBox_ValueChanged(double fVal);
+  void on_actionBlueSpinBox_ValueChanged(double fVal);
+  
 private:
 	Ui::QtD3D11Class ui;
 };

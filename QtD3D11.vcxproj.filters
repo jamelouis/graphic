@@ -41,6 +41,12 @@
     <ClCompile Include="VoxelDebug.cpp">
       <Filter>common</Filter>
     </ClCompile>
+    <ClCompile Include="qtui\lightsetting.cpp">
+      <Filter>Qt\lightsetting</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_lightsetting.cpp">
+      <Filter>Qt\lightsetting</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="tinyobj\include\tiny_obj_loader.h">
@@ -81,6 +87,12 @@
     <CustomBuild Include="QtD3D11.ui">
       <Filter>Qt</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtui\lightsetting.ui">
+      <Filter>Qt\lightsetting</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtui\lightsetting.h">
+      <Filter>Qt\lightsetting</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="tinyobj">
@@ -100,6 +112,9 @@
     </Filter>
     <Filter Include="common">
       <UniqueIdentifier>{781c0ebe-8507-41c6-b6ed-61e1509de32d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Qt\lightsetting">
+      <UniqueIdentifier>{63c2d955-553f-4f94-a3d4-74d68e50224b}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

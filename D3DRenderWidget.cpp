@@ -8,12 +8,12 @@
 
 
 
-D3DRenderWidget::D3DRenderWidget(QWidget* parent)
+D3DRenderWidget::D3DRenderWidget(QWidget* parent, const std::string& filename)
   : QWidget(parent) 
 {
   d3dRender_.createDevice(width(),height(), (HWND)winId());
   d3dRender_.setSimpleCamera(&simpleCamera_);
-  d3dRender_.Init();
+  d3dRender_.Init(filename);
 
   setAttribute(Qt::WA_PaintOnScreen, true);
   setAttribute(Qt::WA_NativeWindow, true);
@@ -79,4 +79,19 @@ void D3DRenderWidget::mouseMoveEvent(QMouseEvent* evt)
   } else {
     evt->ignore();
   }
+}
+
+void D3DRenderWidget::setLightDirX(double x)
+{
+    d3dRender_.cpuCommonBuffer.light.vLightDir.x = x;
+}
+
+void D3DRenderWidget::setLightDirY(double y)
+{
+    d3dRender_.cpuCommonBuffer.light.vLightDir.y = y;
+}
+
+void D3DRenderWidget::setLightDirZ(double z)
+{
+    d3dRender_.cpuCommonBuffer.light.vLightDir.z = z;
 }

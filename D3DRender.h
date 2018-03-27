@@ -33,7 +33,7 @@ public:
     ~D3DRender();
 
 public:
-    HRESULT Init();
+    HRESULT Init(const std::string& filename);
     void    Unit();
 
     void setSimpleCamera(const SimpleCamera* simpleCamera);
@@ -78,6 +78,7 @@ private:
     DxObjModel*    dxObjModel_;
     VoxelDebug*    voxelDebug_;
 
+public:
     CommonBuffer   cpuCommonBuffer;
 
 

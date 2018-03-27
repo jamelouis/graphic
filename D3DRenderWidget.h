@@ -13,10 +13,14 @@ class D3DRenderWidget : public QWidget {
 
 public:
 
-  D3DRenderWidget(QWidget* parent = NULL);
+  D3DRenderWidget(QWidget* parent, const std::string& filename);
   virtual ~D3DRenderWidget();
 
   virtual QPaintEngine* paintEngine() const { return NULL; }
+
+  void setLightDirX(double x);
+  void setLightDirY(double y);
+  void setLightDirZ(double z);
 
 protected:
 
